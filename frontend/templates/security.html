@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b1112">
+    <title>Security | Cloud File Integrity Verification System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+        <symbol id="icon-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3"/></symbol>
+        <symbol id="icon-files" viewBox="0 0 24 24"><path d="M13.5 3.5H7A2.5 2.5 0 0 0 4.5 6v12A2.5 2.5 0 0 0 7 20.5h10a2.5 2.5 0 0 0 2.5-2.5V9z"/><path d="M13 3.5V9h6.5M8 13h8m-8 3.5h8"/></symbol>
+        <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 21s7-3.5 7-9V5l-7-2.5L5 5v7c0 5.5 7 9 7 9z"/><path d="m9 12 2 2 4-4"/></symbol>
+        <symbol id="icon-search-check" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5M8 10.5l1.7 1.7 3.3-3.4"/></symbol>
+        <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+        <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+        <symbol id="icon-cloud-lock" viewBox="0 0 24 24"><path d="M7.5 17.5H6a4 4 0 1 1 .7-7.9A5.5 5.5 0 0 1 17 8.5a4.5 4.5 0 0 1 1.1 8.9H17"/><rect x="8" y="14" width="8" height="7" rx="1.5"/><path d="M10 14v-1a2 2 0 1 1 4 0v1"/></symbol>
+    </svg>
+
+    <div class="app-shell">
+        <button class="sidebar-backdrop" type="button" aria-label="Close navigation menu" tabindex="-1"></button>
+        <aside class="sidebar" id="primary-sidebar" aria-label="Primary navigation">
+            <a class="brand" href="{{ url_for('home') }}" aria-label="Cloud File Integrity Verification System overview">
+                <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#icon-cloud-lock"></use></svg></span>
+                <span class="brand-copy"><strong>CFIV</strong><span>Cloud File Integrity Verification</span></span>
+            </a>
+            <div class="sidebar-section-label">WORKSPACE</div>
+            <nav class="primary-nav" aria-label="Workspace">
+                <a class="nav-item" href="{{ url_for('home') }}"><svg class="icon"><use href="#icon-grid"></use></svg><span>Overview</span></a>
+                <a class="nav-item" href="{{ url_for('register_file') }}"><svg class="icon"><use href="#icon-upload"></use></svg><span>Register File</span></a>
+                <a class="nav-item" href="{{ url_for('my_files_page') }}"><svg class="icon"><use href="#icon-files"></use></svg><span>My Files</span></a>
+                <a class="nav-item" href="{{ url_for('verify_page') }}"><svg class="icon"><use href="#icon-search-check"></use></svg><span>Verify Integrity</span></a>
+            </nav>
+            <div class="sidebar-section-label security-label">SYSTEM</div>
+            <nav class="primary-nav" aria-label="System">
+                <a class="nav-item is-active" href="{{ url_for('security_page') }}" aria-current="page"><svg class="icon"><use href="#icon-shield"></use></svg><span>Security</span></a>
+            </nav>
+            <div class="sidebar-bottom">
+                <div class="sidebar-security-icon"><svg class="icon"><use href="#icon-shield"></use></svg></div>
+                <p>Integrity-first storage</p>
+                <span>Cryptographic verification workspace</span>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <header class="topbar">
+                <button class="menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="primary-sidebar">
+                    <svg class="icon menu-open-icon"><use href="#icon-menu"></use></svg>
+                    <svg class="icon menu-close-icon"><use href="#icon-close"></use></svg>
+                </button>
+                <div class="page-heading"><h1>Security</h1><p>Cryptographic controls and trusted public keys</p></div>
+                <div class="topbar-meta" aria-label="Workspace information">
+                    <span class="workspace-mark" aria-hidden="true">C</span><span class="workspace-name">CFIV Workspace</span>
+                    <span class="topbar-divider" aria-hidden="true"></span><span class="local-indicator"><span class="status-dot"></span>Local instance</span>
+                </div>
+            </header>
+
+            <div class="dashboard-content security-content">
+                {% if error_message %}
+                    <div class="form-feedback form-feedback-error security-error" role="alert">{{ error_message }}</div>
+                {% endif %}
+                <section class="welcome-panel security-welcome" aria-labelledby="security-welcome-title">
+                    <div class="welcome-copy">
+                        <span class="eyebrow"><span class="eyebrow-line"></span> SECURITY OVERVIEW</span>
+                        <h2 id="security-welcome-title">Integrity backed by cryptography.</h2>
+                        <p>CFIV records file fingerprints and verifies them alongside a digital signature from a registered RSA public key.</p>
+                    </div>
+                    <div class="welcome-art" aria-hidden="true"><div class="orbit orbit-outer"></div><div class="orbit orbit-inner"></div><div class="art-glow"></div><svg class="welcome-shield"><use href="#icon-cloud-lock"></use></svg><span class="art-node node-one"></span><span class="art-node node-two"></span><span class="art-node node-three"></span></div>
+                </section>
+
+                <section class="panel security-keys-panel" aria-labelledby="registered-keys-title">
+                    <div class="panel-header">
+                        <div><span class="eyebrow panel-eyebrow">TRUST REGISTRY</span><h2 id="registered-keys-title">Registered public keys</h2></div>
+                        <span class="panel-count"><span>KEYS</span>{{ registered_keys|length }}</span>
+                    </div>
+                    {% if registered_keys %}
+                        <div class="security-key-list">
+                            {% for key in registered_keys %}
+                                <article class="security-key-card">
+                                    <div class="security-key-heading"><span class="security-key-icon"><svg class="icon"><use href="#icon-shield"></use></svg></span><div><h3>RSA public key</h3><p>{{ key.algorithm }} · {{ key.key_size_bits }}-bit</p></div></div>
+                                    <dl class="security-key-details">
+                                        <div><dt>Fingerprint</dt><dd><code>{{ key.fingerprint }}</code><button class="fingerprint-copy" type="button" data-copy-fingerprint="{{ key.fingerprint }}" aria-label="Copy full fingerprint for RSA public key">Copy</button></dd></div>
+                                        <div><dt>Registered</dt><dd><time class="security-registration-date" data-local-datetime datetime="{{ key.created_at }}">{{ key.created_at }}</time></dd></div>
+                                    </dl>
+                                </article>
+                            {% endfor %}
+                        </div>
+                        <p class="security-copy-status" data-copy-status aria-live="polite" aria-atomic="true"></p>
+                    {% else %}
+                        <div class="security-empty"><span class="empty-icon"><svg class="icon"><use href="#icon-shield"></use></svg></span><h3>No public keys registered</h3><p>Register a public key to establish a trusted verification key for file signatures.</p></div>
+                    {% endif %}
+                    <div class="security-panel-footnote">Key identifiers are SHA-256 fingerprints of the registered public keys.</div>
+                </section>
+
+                <section class="security-info-grid" aria-label="Cryptographic protections">
+                    <article class="panel security-info-card"><span class="security-card-label">FILE FINGERPRINTS</span><h2>SHA-256 and SHA3-256</h2><p>CFIV calculates both digests from the file bytes. Verification recalculates them and compares each result with its registered value.</p></article>
+                    <article class="panel security-info-card"><span class="security-card-label">DIGITAL SIGNATURES</span><h2>RSA 2048-bit with RSA-PSS</h2><p>Newly generated RSA keys are 2048-bit. Signatures use RSA-PSS with MGF1-SHA256. The current combined scheme signs a digest derived from both file hashes; legacy SHA-256 signatures remain supported.</p></article>
+                    <article class="panel security-info-card"><span class="security-card-label">PRIVATE KEY PROTECTION</span><h2>Encrypted PEM storage</h2><p>CFIV serializes the private key in PKCS#8 PEM using cryptography’s <code>BestAvailableEncryption</code> with the supplied password. The private key is kept at the configured filesystem path and is not stored in the database. CFIV does not display the key or password here.</p></article>
+                    <article class="panel security-info-card"><span class="security-card-label">STORAGE ACCESS</span><h2>Authenticated Cloudinary resources</h2><p>For Cloudinary-backed records, original files and signature artifacts are stored as authenticated raw resources. CFIV retrieves them server-side for verification; this page does not expose resource identifiers or delivery URLs.</p></article>
+                </section>
+                <section class="panel security-flow-panel" aria-labelledby="verification-security-title">
+                    <div class="panel-header"><div><span class="eyebrow panel-eyebrow">INTEGRITY CHECK</span><h2 id="verification-security-title">How verification detects changes</h2></div></div>
+                    <p>During verification, CFIV reads the registered file, recalculates SHA-256 and SHA3-256, and compares both against the stored record. It then verifies the RSA-PSS signature using the registered public key and the record’s signature scheme. A changed file affects its hash comparison and signature check; Cloudinary signature artifacts are also checked against the signature bytes stored in the database.</p>
+                </section>
+                <footer class="dashboard-footer"><span>CFIV <span class="footer-separator">/</span> Security</span><span class="footer-build"><span class="footer-dot"></span>SECURITY CONTROLS</span></footer>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/security.js') }}" defer></script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b1112">
+    <title>My Files | Cloud File Integrity Verification System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+        <symbol id="icon-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3"/></symbol>
+        <symbol id="icon-files" viewBox="0 0 24 24"><path d="M13.5 3.5H7A2.5 2.5 0 0 0 4.5 6v12A2.5 2.5 0 0 0 7 20.5h10a2.5 2.5 0 0 0 2.5-2.5V9z"/><path d="M13 3.5V9h6.5M8 13h8m-8 3.5h8"/></symbol>
+        <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 21s7-3.5 7-9V5l-7-2.5L5 5v7c0 5.5 7 9 7 9z"/><path d="m9 12 2 2 4-4"/></symbol>
+        <symbol id="icon-search-check" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5M8 10.5l1.7 1.7 3.3-3.4"/></symbol>
+        <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+        <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+        <symbol id="icon-cloud-lock" viewBox="0 0 24 24"><path d="M7.5 17.5H6a4 4 0 1 1 .7-7.9A5.5 5.5 0 0 1 17 8.5a4.5 4.5 0 0 1 1.1 8.9H17"/><rect x="8" y="14" width="8" height="7" rx="1.5"/><path d="M10 14v-1a2 2 0 1 1 4 0v1"/></symbol>
+        <symbol id="icon-empty" viewBox="0 0 48 48"><path d="M8 15.5 24 7l16 8.5v17L24 41 8 32.5z"/><path d="m8.5 15.8 15.5 8.7 15.5-8.7M24 24.5V40"/></symbol>
+    </svg>
+
+    <div class="app-shell">
+        <button class="sidebar-backdrop" type="button" aria-label="Close navigation menu" tabindex="-1"></button>
+
+        <aside class="sidebar" id="primary-sidebar" aria-label="Primary navigation">
+            <a class="brand" href="{{ url_for('home') }}" aria-label="Cloud File Integrity Verification System overview">
+                <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#icon-cloud-lock"></use></svg></span>
+                <span class="brand-copy"><strong>CFIV</strong><span>Cloud File Integrity Verification</span></span>
+            </a>
+
+            <div class="sidebar-section-label">WORKSPACE</div>
+            <nav class="primary-nav" aria-label="Workspace">
+                <a class="nav-item" href="{{ url_for('home') }}"><svg class="icon"><use href="#icon-grid"></use></svg><span>Overview</span></a>
+                <a class="nav-item" href="{{ url_for('register_file') }}"><svg class="icon"><use href="#icon-upload"></use></svg><span>Register File</span></a>
+                <a class="nav-item is-active" href="#my-files-panel" aria-current="page"><svg class="icon"><use href="#icon-files"></use></svg><span>My Files</span></a>
+                <a class="nav-item" href="{{ url_for('verify_page') }}"><svg class="icon"><use href="#icon-search-check"></use></svg><span>Verify Integrity</span></a>
+            </nav>
+
+            <div class="sidebar-section-label security-label">SYSTEM</div>
+            <nav class="primary-nav" aria-label="System">
+                <a class="nav-item" href="{{ url_for('security_page') }}">
+                    <svg class="icon"><use href="#icon-shield"></use></svg><span>Security</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-security-icon"><svg class="icon"><use href="#icon-shield"></use></svg></div>
+                <p>Integrity-first storage</p>
+                <span>Cryptographic verification workspace</span>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <header class="topbar">
+                <button class="menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="primary-sidebar">
+                    <svg class="icon menu-open-icon"><use href="#icon-menu"></use></svg>
+                    <svg class="icon menu-close-icon"><use href="#icon-close"></use></svg>
+                </button>
+                <div class="page-heading">
+                    <h1>My Files</h1>
+                    <p>Review registered files and their latest integrity status</p>
+                </div>
+                <div class="topbar-meta" aria-label="Workspace information">
+                    <span class="workspace-mark" aria-hidden="true">C</span>
+                    <span class="workspace-name">CFIV Workspace</span>
+                    <span class="topbar-divider" aria-hidden="true"></span>
+                    <span class="local-indicator"><span class="status-dot"></span>Local instance</span>
+                </div>
+            </header>
+
+            <div class="dashboard-content my-files-content">
+                {% if error_message %}
+                    <section class="notification-region" aria-label="Notification">
+                        <div class="notification notification--error" data-notification data-dismiss-ms="10000" role="alert" aria-live="assertive" aria-atomic="true">
+                            <p class="notification-message">{{ error_message }}</p>
+                            <button class="notification-close" type="button" data-notification-close aria-label="Dismiss notification">&times;</button>
+                        </div>
+                    </section>
+                {% endif %}
+
+                <section class="welcome-panel my-files-welcome" aria-labelledby="my-files-title">
+                    <div class="welcome-copy">
+                        <span class="eyebrow"><span class="eyebrow-line"></span> YOUR LIBRARY</span>
+                        <h2 id="my-files-title">Registered files</h2>
+                        <p>Find a file, review its latest integrity result, or run a new verification check.</p>
+                    </div>
+                    <div class="welcome-art" aria-hidden="true">
+                        <div class="orbit orbit-outer"></div><div class="orbit orbit-inner"></div><div class="art-glow"></div>
+                        <svg class="welcome-shield"><use href="#icon-files"></use></svg>
+                        <span class="art-node node-one"></span><span class="art-node node-two"></span><span class="art-node node-three"></span>
+                    </div>
+                </section>
+
+                <section class="panel my-files-panel" id="my-files-panel" aria-labelledby="my-files-list-title">
+                    <div class="panel-header my-files-header">
+                        <div>
+                            <span class="eyebrow panel-eyebrow">CFIV WORKSPACE</span>
+                            <h2 id="my-files-list-title">File library</h2>
+                        </div>
+                        <span class="panel-count" aria-label="{{ registered_files|length }} registered files">{{ registered_files|length }} <span>FILES</span></span>
+                    </div>
+
+                    <div class="files-toolbar" aria-label="File search and filters">
+                        <div class="form-field files-search-field">
+                            <label class="form-label" for="my-files-search">Search by filename</label>
+                            <input class="form-control" id="my-files-search" type="search" placeholder="Search files" autocomplete="off" {% if not registered_files %}disabled{% endif %}>
+                        </div>
+                        <div class="form-field files-filter-field">
+                            <label class="form-label" for="my-files-status">Integrity status</label>
+                            <select class="form-control" id="my-files-status" {% if not registered_files %}disabled{% endif %}>
+                                <option value="all">All statuses</option>
+                                <option value="Verified">Verified</option>
+                                <option value="Tampered">Failed / Tampered</option>
+                                <option value="Unverified">Unverified</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap my-files-table-wrap">
+                        <table class="my-files-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Filename</th>
+                                    <th scope="col">Date registered</th>
+                                    <th scope="col">File size</th>
+                                    <th scope="col">Latest integrity status</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="my-files-list">
+                                {% for file in registered_files %}
+                                    <tr class="my-file-row" data-file-row data-filename="{{ file.original_name }}" data-status="{{ file.status }}">
+                                        <td class="my-file-name">{{ file.original_name }}</td>
+                                        <td><time data-registration-time datetime="{{ file.created_at }}">{{ file.created_at }}</time></td>
+                                        <td data-file-size="{{ file.size_bytes }}">{{ file.size_bytes }} B</td>
+                                        <td><span class="status-badge status-{{ file.status|lower }}">{{ file.status }}</span></td>
+                                        <td>
+                                            <form class="my-file-verify-form" method="post" action="{{ url_for('verify_page') }}">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                                <input type="hidden" name="file_id" value="{{ file.file_id }}">
+                                                <button class="my-file-verify-button" type="submit" aria-label="Verify {{ file.original_name }}">
+                                                    <svg class="icon" aria-hidden="true"><use href="#icon-search-check"></use></svg><span>Verify</span>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="empty-state my-files-empty">
+                                                <span class="empty-icon"><svg class="icon"><use href="#icon-empty"></use></svg></span>
+                                                <h3>No registered files yet</h3>
+                                                <p>Files registered in this CFIV workspace will appear here.</p>
+                                                <a class="back-link" href="{{ url_for('register_file') }}">Register a file</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                {% if registered_files %}
+                                    <tr id="my-files-no-results" hidden>
+                                        <td colspan="5">
+                                            <div class="empty-state my-files-empty">
+                                                <h3>No matching files</h3>
+                                                <p>Try a different filename or status filter.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if registered_files %}
+                        <div class="table-footnote"><svg class="icon"><use href="#icon-shield"></use></svg><span>Status reflects the latest recorded verification. Opening this page does not run a check.</span></div>
+                    {% endif %}
+                </section>
+
+                <footer class="dashboard-footer">
+                    <span>Cloud File Integrity Verification System (CFIV)</span>
+                    <span class="footer-build"><span class="footer-dot"></span> LOCAL WORKSPACE</span>
+                </footer>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/my_files.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/notifications.js') }}" defer></script>
+</body>
+</html>

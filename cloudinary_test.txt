@@ -1,0 +1,1 @@
+CFIV Cloudinary integration test - November 2026

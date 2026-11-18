@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b1112">
+    <title>Verify File Integrity | Cloud File Integrity Verification System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+        <symbol id="icon-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3"/></symbol>
+        <symbol id="icon-files" viewBox="0 0 24 24"><path d="M13.5 3.5H7A2.5 2.5 0 0 0 4.5 6v12A2.5 2.5 0 0 0 7 20.5h10a2.5 2.5 0 0 0 2.5-2.5V9z"/><path d="M13 3.5V9h6.5M8 13h8m-8 3.5h8"/></symbol>
+        <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 21s7-3.5 7-9V5l-7-2.5L5 5v7c0 5.5 7 9 7 9z"/><path d="m9 12 2 2 4-4"/></symbol>
+        <symbol id="icon-search-check" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5M8 10.5l1.7 1.7 3.3-3.4"/></symbol>
+        <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+        <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+        <symbol id="icon-cloud-lock" viewBox="0 0 24 24"><path d="M7.5 17.5H6a4 4 0 1 1 .7-7.9A5.5 5.5 0 0 1 17 8.5a4.5 4.5 0 0 1 1.1 8.9H17"/><rect x="8" y="14" width="8" height="7" rx="1.5"/><path d="M10 14v-1a2 2 0 1 1 4 0v1"/></symbol>
+    </svg>
+
+    <div class="app-shell">
+        <button class="sidebar-backdrop" type="button" aria-label="Close navigation menu" tabindex="-1"></button>
+
+        <aside class="sidebar" id="primary-sidebar" aria-label="Primary navigation">
+            <a class="brand" href="{{ url_for('home') }}" aria-label="Cloud File Integrity Verification System overview">
+                <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#icon-cloud-lock"></use></svg></span>
+                <span class="brand-copy"><strong>CFIV</strong><span>Cloud File Integrity Verification</span></span>
+            </a>
+
+            <div class="sidebar-section-label">WORKSPACE</div>
+            <nav class="primary-nav" aria-label="Workspace">
+                <a class="nav-item" href="{{ url_for('home') }}">
+                    <svg class="icon"><use href="#icon-grid"></use></svg><span>Overview</span>
+                </a>
+                <a class="nav-item" href="{{ url_for('register_file') }}">
+                    <svg class="icon"><use href="#icon-upload"></use></svg><span>Register File</span>
+                </a>
+                <a class="nav-item" href="{{ url_for('my_files_page') }}">
+                    <svg class="icon"><use href="#icon-files"></use></svg><span>My Files</span>
+                </a>
+                <a class="nav-item is-active" href="#verification-panel" aria-current="page">
+                    <svg class="icon"><use href="#icon-search-check"></use></svg><span>Verify Integrity</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-section-label security-label">SYSTEM</div>
+            <nav class="primary-nav" aria-label="System">
+                <a class="nav-item" href="{{ url_for('security_page') }}">
+                    <svg class="icon"><use href="#icon-shield"></use></svg><span>Security</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-security-icon"><svg class="icon"><use href="#icon-shield"></use></svg></div>
+                <p>Integrity-first storage</p>
+                <span>Cryptographic verification workspace</span>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <header class="topbar">
+                <button class="menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="primary-sidebar">
+                    <svg class="icon menu-open-icon"><use href="#icon-menu"></use></svg>
+                    <svg class="icon menu-close-icon"><use href="#icon-close"></use></svg>
+                </button>
+                <div class="page-heading">
+                    <h1>Verify File Integrity</h1>
+                    <p>Check a registered file against its integrity record</p>
+                </div>
+                <div class="topbar-meta" aria-label="Workspace information">
+                    <span class="workspace-mark" aria-hidden="true">C</span>
+                    <span class="workspace-name">CFIV Workspace</span>
+                    <span class="topbar-divider" aria-hidden="true"></span>
+                    <span class="local-indicator"><span class="status-dot"></span>Local instance</span>
+                </div>
+            </header>
+
+            <div class="dashboard-content verify-content">
+                {% if error_message or verification_attempt %}
+                    <section class="notification-region verify-notifications" aria-label="Verification notification">
+                        {% if error_message %}
+                            <div class="notification notification--error" data-notification data-dismiss-ms="10000" role="alert" aria-live="assertive" aria-atomic="true">
+                                <p class="notification-message">{{ error_message }}</p>
+                                <button class="notification-close" type="button" data-notification-close aria-label="Dismiss notification">&times;</button>
+                            </div>
+                        {% elif verification_attempt %}
+                            {% set checks_passed = verification_attempt.sha256_match and verification_attempt.sha3_256_match and verification_attempt.signature_valid %}
+                            {% if verification_attempt.integrity_verified and checks_passed %}
+                                <div class="notification notification--success" data-notification data-dismiss-ms="8000" role="status" aria-live="polite" aria-atomic="true">
+                                    <p class="notification-message"><strong>Integrity verified.</strong> SHA-256, SHA3-256, and RSA signature checks all passed.</p>
+                                    <button class="notification-close" type="button" data-notification-close aria-label="Dismiss notification">&times;</button>
+                                </div>
+                            {% else %}
+                                <div class="notification notification--error" data-notification data-dismiss-ms="10000" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <p class="notification-message"><strong>Verification did not fully pass.</strong> Recorded overall result: {{ 'Verified' if verification_attempt.integrity_verified else 'Tampered' }}. SHA-256: {{ 'Passed' if verification_attempt.sha256_match else 'Failed' }}; SHA3-256: {{ 'Passed' if verification_attempt.sha3_256_match else 'Failed' }}; RSA signature: {{ 'Passed' if verification_attempt.signature_valid else 'Failed' }}.</p>
+                                    <button class="notification-close" type="button" data-notification-close aria-label="Dismiss notification">&times;</button>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </section>
+                {% endif %}
+                <section class="welcome-panel verify-welcome" aria-labelledby="verify-title">
+                    <div class="welcome-copy">
+                        <span class="eyebrow"><span class="eyebrow-line"></span> INTEGRITY VERIFICATION</span>
+                        <h2 id="verify-title">Verify a registered file</h2>
+                        <p>Choose a file already registered in CFIV. Its current content will be checked against the saved hash values and RSA signature.</p>
+                    </div>
+                    <div class="welcome-art" aria-hidden="true">
+                        <div class="orbit orbit-outer"></div>
+                        <div class="orbit orbit-inner"></div>
+                        <div class="art-glow"></div>
+                        <svg class="welcome-shield"><use href="#icon-search-check"></use></svg>
+                        <span class="art-node node-one"></span><span class="art-node node-two"></span><span class="art-node node-three"></span>
+                    </div>
+                </section>
+
+                <section class="panel verify-panel" id="verification-panel" aria-labelledby="file-selection-title">
+                    <div class="panel-header">
+                        <div>
+                            <span class="eyebrow panel-eyebrow">REGISTERED FILE</span>
+                            <h2 id="file-selection-title">Select a file to verify</h2>
+                        </div>
+                    </div>
+
+                    <form class="verify-form" method="post" action="{{ url_for('verify_page') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        {% if error_message %}
+                            <div class="verify-feedback" role="alert" aria-live="assertive">{{ error_message }}</div>
+                        {% endif %}
+
+                        <div class="form-field">
+                            <label class="form-label" for="registered-file">File</label>
+                            <select class="form-control" id="registered-file" name="file_id" required {% if not registered_files %}disabled{% endif %}>
+                                {% if registered_files %}
+                                    <option value="" {% if not verification_attempt %}selected{% endif %}>Select a registered file</option>
+                                    {% for file in registered_files %}
+                                        <option value="{{ file.file_id }}" data-original-name="{{ file.original_name }}" data-created-at="{{ file.created_at }}" data-size-bytes="{{ file.size_bytes }}" {% if verification_attempt and file.file_id == verification_attempt.file_id %}selected{% endif %}>{{ file.original_name }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="" selected>No registered files available</option>
+                                {% endif %}
+                            </select>
+                            {% if not registered_files %}
+                                <p class="field-hint">Register a file before starting an integrity check.</p>
+                            {% else %}
+                                <p class="field-hint">Only files registered in this CFIV workspace can be checked.</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="selected-record" id="selected-record" aria-live="polite" aria-label="Selected file details">
+                            <div class="record-detail">
+                                <span class="record-label">Filename</span>
+                                <span class="record-value" id="selected-name">No file selected</span>
+                            </div>
+                            <div class="record-detail">
+                                <span class="record-label">Date registered</span>
+                                <span class="record-value" id="selected-date">—</span>
+                            </div>
+                            <div class="record-detail">
+                                <span class="record-label">File size</span>
+                                <span class="record-value" id="selected-size">—</span>
+                            </div>
+                        </div>
+
+                        <div class="verify-actions">
+                            <a class="back-link" href="{{ url_for('home') }}">Back to overview</a>
+                            <button class="register-submit" id="verify-submit" type="submit" disabled aria-describedby="verify-action-note">
+                                <svg class="icon" aria-hidden="true"><use href="#icon-search-check"></use></svg>
+                                Verify Integrity
+                            </button>
+                        </div>
+                        <p class="verify-action-note" id="verify-action-note" aria-live="polite">Select a registered file to enable verification.</p>
+                    </form>
+                </section>
+
+                <section class="panel results-panel" aria-labelledby="verification-results-title">
+                    <div class="panel-header">
+                        <div>
+                            <span class="eyebrow panel-eyebrow">CHECK RESULTS</span>
+                            <h2 id="verification-results-title">Integrity verification</h2>
+                        </div>
+                        {% if verification_attempt %}
+                            {% if verification_attempt.integrity_verified %}
+                                <span class="result-overall result-verified" role="status" aria-live="polite">
+                                    <span class="result-indicator" aria-hidden="true"></span>Verified
+                                </span>
+                            {% else %}
+                                <span class="result-overall result-tampered" role="status" aria-live="polite">
+                                    <span class="result-indicator" aria-hidden="true"></span>Tampered
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span class="result-overall result-pending" role="status" aria-live="polite">
+                                <span class="result-indicator" aria-hidden="true"></span>Awaiting verification
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    {% if verification_attempt %}
+                        <div class="result-meta">
+                            <span class="record-label">File</span>
+                            <span class="record-value">{{ verification_attempt.original_name }}</span>
+                            <span class="record-label">Verified</span>
+                            <time class="record-value" id="verification-time" datetime="{{ verification_attempt.created_at }}" data-timestamp="{{ verification_attempt.created_at }}">{{ verification_attempt.created_at }}</time>
+                        </div>
+                    {% endif %}
+
+                    <div class="check-list" aria-label="Verification checks">
+                        <article class="check-item">
+                            <span class="check-icon" aria-hidden="true"><svg class="icon"><use href="#icon-search-check"></use></svg></span>
+                            <div class="check-copy"><h3>SHA-256 hash comparison</h3><p>Current file digest compared with its registered value</p></div>
+                            {% if verification_attempt %}
+                                <span class="check-status {{ 'is-passed' if verification_attempt.sha256_match else 'is-failed' }}">{{ 'Passed' if verification_attempt.sha256_match else 'Failed' }}</span>
+                            {% else %}
+                                <span class="check-status">Not run</span>
+                            {% endif %}
+                        </article>
+                        <article class="check-item">
+                            <span class="check-icon" aria-hidden="true"><svg class="icon"><use href="#icon-search-check"></use></svg></span>
+                            <div class="check-copy"><h3>SHA3-256 hash comparison</h3><p>Independent digest compared with its registered value</p></div>
+                            {% if verification_attempt %}
+                                <span class="check-status {{ 'is-passed' if verification_attempt.sha3_256_match else 'is-failed' }}">{{ 'Passed' if verification_attempt.sha3_256_match else 'Failed' }}</span>
+                            {% else %}
+                                <span class="check-status">Not run</span>
+                            {% endif %}
+                        </article>
+                        <article class="check-item">
+                            <span class="check-icon" aria-hidden="true"><svg class="icon"><use href="#icon-shield"></use></svg></span>
+                            <div class="check-copy"><h3>RSA digital signature</h3><p>Signature checked using the registered public key</p></div>
+                            {% if verification_attempt %}
+                                <span class="check-status {{ 'is-passed' if verification_attempt.signature_valid else 'is-failed' }}">{{ 'Passed' if verification_attempt.signature_valid else 'Failed' }}</span>
+                            {% else %}
+                                <span class="check-status">Not run</span>
+                            {% endif %}
+                        </article>
+                    </div>
+                </section>
+
+                <footer class="dashboard-footer">
+                    <span>Cloud File Integrity Verification System (CFIV)</span>
+                    <span class="footer-build"><span class="footer-dot"></span> LOCAL WORKSPACE</span>
+                </footer>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/verify.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/notifications.js') }}" defer></script>
+</body>
+</html>

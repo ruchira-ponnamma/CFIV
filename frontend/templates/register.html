@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b1112">
+    <title>Register File | Cloud File Integrity Verification System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+        <symbol id="icon-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3"/></symbol>
+        <symbol id="icon-files" viewBox="0 0 24 24"><path d="M13.5 3.5H7A2.5 2.5 0 0 0 4.5 6v12A2.5 2.5 0 0 0 7 20.5h10a2.5 2.5 0 0 0 2.5-2.5V9z"/><path d="M13 3.5V9h6.5M8 13h8m-8 3.5h8"/></symbol>
+        <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 21s7-3.5 7-9V5l-7-2.5L5 5v7c0 5.5 7 9 7 9z"/><path d="m9 12 2 2 4-4"/></symbol>
+        <symbol id="icon-search-check" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5M8 10.5l1.7 1.7 3.3-3.4"/></symbol>
+        <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+        <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+        <symbol id="icon-cloud-lock" viewBox="0 0 24 24"><path d="M7.5 17.5H6a4 4 0 1 1 .7-7.9A5.5 5.5 0 0 1 17 8.5a4.5 4.5 0 0 1 1.1 8.9H17"/><rect x="8" y="14" width="8" height="7" rx="1.5"/><path d="M10 14v-1a2 2 0 1 1 4 0v1"/></symbol>
+    </svg>
+
+    <div class="app-shell">
+        <button class="sidebar-backdrop" type="button" aria-label="Close navigation menu" tabindex="-1"></button>
+
+        <aside class="sidebar" id="primary-sidebar" aria-label="Primary navigation">
+            <a class="brand" href="{{ url_for('home') }}" aria-label="Cloud File Integrity Verification System overview">
+                <span class="brand-mark" aria-hidden="true"><svg class="icon"><use href="#icon-cloud-lock"></use></svg></span>
+                <span class="brand-copy"><strong>CFIV</strong><span>Cloud File Integrity Verification</span></span>
+            </a>
+
+            <div class="sidebar-section-label">WORKSPACE</div>
+            <nav class="primary-nav" aria-label="Workspace">
+                <a class="nav-item" href="{{ url_for('home') }}">
+                    <svg class="icon"><use href="#icon-grid"></use></svg><span>Overview</span>
+                </a>
+                <a class="nav-item is-active" href="#register-form" aria-current="page">
+                    <svg class="icon"><use href="#icon-upload"></use></svg><span>Register File</span>
+                </a>
+                <a class="nav-item" href="{{ url_for('my_files_page') }}">
+                    <svg class="icon"><use href="#icon-files"></use></svg><span>My Files</span>
+                </a>
+                <button class="nav-item is-unavailable" type="button" disabled aria-label="Verify Integrity, unavailable yet">
+                    <svg class="icon"><use href="#icon-search-check"></use></svg><span>Verify Integrity</span><span class="nav-soon">Soon</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-section-label security-label">SYSTEM</div>
+            <nav class="primary-nav" aria-label="System">
+                <a class="nav-item" href="{{ url_for('security_page') }}">
+                    <svg class="icon"><use href="#icon-shield"></use></svg><span>Security</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-security-icon"><svg class="icon"><use href="#icon-shield"></use></svg></div>
+                <p>Integrity-first storage</p>
+                <span>Cryptographic verification workspace</span>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <header class="topbar">
+                <button class="menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="primary-sidebar">
+                    <svg class="icon menu-open-icon"><use href="#icon-menu"></use></svg>
+                    <svg class="icon menu-close-icon"><use href="#icon-close"></use></svg>
+                </button>
+                <div class="page-heading">
+                    <h1>Register File</h1>
+                    <p>Create a signed integrity record for a file</p>
+                </div>
+                <div class="topbar-meta" aria-label="Workspace information">
+                    <span class="workspace-mark" aria-hidden="true">C</span>
+                    <span class="workspace-name">CFIV Workspace</span>
+                    <span class="topbar-divider" aria-hidden="true"></span>
+                    <span class="local-indicator"><span class="status-dot"></span>Local instance</span>
+                </div>
+            </header>
+
+            <div class="dashboard-content register-content">
+                <section class="welcome-panel register-welcome" aria-labelledby="register-title">
+                    <div class="welcome-copy">
+                        <span class="eyebrow"><span class="eyebrow-line"></span> SECURE FILE REGISTRATION</span>
+                        <h2 id="register-title">Register a file</h2>
+                        <p>Select a file and the registered public key paired with your private key. CFIV will create a cryptographically signed integrity record.</p>
+                    </div>
+                    <div class="welcome-art" aria-hidden="true">
+                        <div class="orbit orbit-outer"></div>
+                        <div class="orbit orbit-inner"></div>
+                        <div class="art-glow"></div>
+                        <svg class="welcome-shield"><use href="#icon-cloud-lock"></use></svg>
+                        <span class="art-node node-one"></span><span class="art-node node-two"></span><span class="art-node node-three"></span>
+                    </div>
+                </section>
+
+                <section class="panel register-panel" aria-labelledby="registration-details-title">
+                    <div class="panel-header">
+                        <div>
+                            <span class="eyebrow panel-eyebrow">FILE DETAILS</span>
+                            <h2 id="registration-details-title">Registration details</h2>
+                        </div>
+                    </div>
+
+                    <form id="register-form" class="register-form" method="post" action="{{ url_for('register_file') }}" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        {% set registration_flashes = get_flashed_messages(with_categories=true) %}
+                        {% if registration_flashes or error_message %}
+                            <section class="notification-region" aria-label="Notifications">
+                                {% for category, message in registration_flashes %}
+                                    <div class="notification notification--{{ 'error' if category == 'error' else 'success' if category == 'success' else 'info' }}" data-notification data-notification-id="registration-flash-{{ loop.index }}" data-dismiss-ms="8000" role="{{ 'alert' if category == 'error' else 'status' }}" aria-live="{{ 'assertive' if category == 'error' else 'polite' }}" aria-atomic="true">
+                                        <p class="notification-message">{{ message }}</p>
+                                        <button class="notification-close" type="button" data-notification-close aria-label="Dismiss notification">&times;</button>
+                                    </div>
+                                {% endfor %}
+                                {% if error_message %}
+                                    <div class="notification notification--error" data-notification data-notification-id="registration-error" data-dismiss-ms="10000" role="alert" aria-live="assertive" aria-atomic="true">
+                                        <p class="notification-message">{{ error_message }}</p>
+                                        <button class="notification-close" type="button" data-notification-close aria-label="Dismiss notification">&times;</button>
+                                    </div>
+                                {% endif %}
+                            </section>
+                        {% endif %}
+                        {% for category, message in registration_flashes %}
+                                <div class="form-feedback{% if category == 'error' %} form-feedback-error{% endif %}" data-notification-fallback data-notification-id="registration-flash-{{ loop.index }}" role="{{ 'alert' if category == 'error' else 'status' }}" aria-live="{{ 'assertive' if category == 'error' else 'polite' }}">{{ message }}</div>
+                        {% endfor %}
+                        {% if error_message %}
+                            <div class="form-feedback form-feedback-error" data-notification-fallback data-notification-id="registration-error" role="alert" aria-live="assertive">{{ error_message }}</div>
+                        {% endif %}
+
+                        <div class="form-field">
+                            <span class="form-label" id="upload-label">File to register</span>
+                            <label class="file-dropzone" id="file-dropzone" for="file-input" tabindex="0" aria-describedby="file-help selected-file">
+                                <input id="file-input" class="file-input" type="file" name="upload_file" aria-labelledby="upload-label" aria-describedby="file-help selected-file" required>
+                                <span class="dropzone-icon" aria-hidden="true"><svg class="icon"><use href="#icon-upload"></use></svg></span>
+                                <span class="dropzone-title">Drag and drop your file here</span>
+                                <span class="dropzone-caption">or <span class="browse-link">browse files</span></span>
+                                <span class="dropzone-limit" id="file-help">Maximum file size: 16 MB</span>
+                                <span class="selected-file" id="selected-file" aria-live="polite">No file selected</span>
+                            </label>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="key-id">Registered public key</label>
+                            <select id="key-id" name="key_id" class="form-control" required {% if not registered_keys %}disabled{% endif %}>
+                                {% if registered_keys %}
+                                    <option value="" selected disabled>Select a registered public key</option>
+                                    {% for key in registered_keys %}
+                                        <option value="{{ key.key_id }}">{{ key.key_id }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="" selected disabled>No registered public keys available</option>
+                                {% endif %}
+                            </select>
+                            {% if not registered_keys %}
+                                <p class="field-hint">Register a public key before creating a file record.</p>
+                            {% else %}
+                                <p class="field-hint">Choose the key that matches the private key you will unlock below.</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="private-key-password">Private-key password</label>
+                            <input class="form-control" id="private-key-password" name="private_key_password" type="password" autocomplete="current-password" required>
+                            <p class="field-hint">Enter the password that protects your encrypted private key.</p>
+                        </div>
+
+                        <div class="security-note" role="note">
+                            <svg class="icon" aria-hidden="true"><use href="#icon-shield"></use></svg>
+                            <p>Your private-key password is used only to sign this file registration. It is not stored.</p>
+                        </div>
+
+                        <div class="form-actions">
+                            <a class="back-link" href="{{ url_for('home') }}">Back to overview</a>
+                            <button class="register-submit" type="submit">Register File</button>
+                        </div>
+                    </form>
+                </section>
+
+                <footer class="dashboard-footer">
+                    <span>Cloud File Integrity Verification System (CFIV)</span>
+                    <span class="footer-build"><span class="footer-dot"></span> LOCAL WORKSPACE</span>
+                </footer>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/register.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/notifications.js') }}" defer></script>
+</body>
+</html>

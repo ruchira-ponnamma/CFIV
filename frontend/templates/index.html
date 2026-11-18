@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b1112">
+    <title>Cloud File Integrity Verification System | CFIV</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+        <symbol id="icon-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3"/></symbol>
+        <symbol id="icon-files" viewBox="0 0 24 24"><path d="M13.5 3.5H7A2.5 2.5 0 0 0 4.5 6v12A2.5 2.5 0 0 0 7 20.5h10a2.5 2.5 0 0 0 2.5-2.5V9z"/><path d="M13 3.5V9h6.5M8 13h8m-8 3.5h8"/></symbol>
+        <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 21s7-3.5 7-9V5l-7-2.5L5 5v7c0 5.5 7 9 7 9z"/><path d="m9 12 2 2 4-4"/></symbol>
+        <symbol id="icon-key" viewBox="0 0 24 24"><circle cx="8" cy="15.5" r="4"/><path d="m11 12.5 8-8 2.5 2.5-2 2-1.5-1.5-2 2 1.5 1.5-2.5 2.5"/></symbol>
+        <symbol id="icon-search-check" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5M8 10.5l1.7 1.7 3.3-3.4"/></symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12.5 4.2 4.2L19.5 6.5"/></symbol>
+        <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M10.3 4.6 2.8 18a1.7 1.7 0 0 0 1.5 2.5h15.4a1.7 1.7 0 0 0 1.5-2.5L13.7 4.6a2 2 0 0 0-3.4 0z"/><path d="M12 9v4m0 3.2h.01"/></symbol>
+        <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></symbol>
+        <symbol id="icon-arrow-up-right" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></symbol>
+        <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+        <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+        <symbol id="icon-cloud-lock" viewBox="0 0 24 24"><path d="M7.5 17.5H6a4 4 0 1 1 .7-7.9A5.5 5.5 0 0 1 17 8.5a4.5 4.5 0 0 1 1.1 8.9H17"/><rect x="8" y="14" width="8" height="7" rx="1.5"/><path d="M10 14v-1a2 2 0 1 1 4 0v1"/></symbol>
+        <symbol id="icon-empty" viewBox="0 0 48 48"><path d="M8 15.5 24 7l16 8.5v17L24 41 8 32.5z"/><path d="m8.5 15.8 15.5 8.7 15.5-8.7M24 24.5V40"/><path d="M16 11.3 32 20"/></symbol>
+    </svg>
+
+    <div class="app-shell">
+        <button class="sidebar-backdrop" type="button" aria-label="Close navigation menu" tabindex="-1"></button>
+
+        <aside class="sidebar" id="primary-sidebar" aria-label="Primary navigation">
+            <a class="brand" href="{{ url_for('home') }}" aria-label="Cloud File Integrity Verification System overview">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg class="icon"><use href="#icon-cloud-lock"></use></svg>
+                </span>
+                <span class="brand-copy"><strong>CFIV</strong><span>Cloud File Integrity Verification</span></span>
+            </a>
+
+            <div class="sidebar-section-label">WORKSPACE</div>
+            <nav class="primary-nav" aria-label="Workspace">
+                <a class="nav-item is-active" href="{{ url_for('home') }}" aria-current="page">
+                    <svg class="icon"><use href="#icon-grid"></use></svg><span>Overview</span>
+                </a>
+                <a class="nav-item" href="{{ url_for('register_file') }}">
+                    <svg class="icon"><use href="#icon-upload"></use></svg><span>Register File</span>
+                </a>
+                <a class="nav-item" href="{{ url_for('my_files_page') }}">
+                    <svg class="icon"><use href="#icon-files"></use></svg><span>My Files</span>
+                </a>
+                <a class="nav-item" href="{{ url_for('verify_page') }}" aria-label="Verify Integrity">
+                    <svg class="icon"><use href="#icon-search-check"></use></svg><span>Verify Integrity</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-section-label security-label">SYSTEM</div>
+            <nav class="primary-nav" aria-label="System">
+                <a class="nav-item" href="{{ url_for('security_page') }}">
+                    <svg class="icon"><use href="#icon-shield"></use></svg><span>Security</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-security-icon"><svg class="icon"><use href="#icon-shield"></use></svg></div>
+                <p>Integrity-first storage</p>
+                <span>Cryptographic verification workspace</span>
+            </div>
+        </aside>
+
+        <main class="main-area" id="overview">
+            <header class="topbar">
+                <button class="menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="primary-sidebar">
+                    <svg class="icon menu-open-icon"><use href="#icon-menu"></use></svg>
+                    <svg class="icon menu-close-icon"><use href="#icon-close"></use></svg>
+                </button>
+                <div class="page-heading">
+                    <h1>Overview</h1>
+                    <p>Your file integrity workspace</p>
+                </div>
+                <div class="topbar-meta" aria-label="Workspace information">
+                    <span class="workspace-mark" aria-hidden="true">C</span>
+                    <span class="workspace-name">CFIV Workspace</span>
+                    <span class="topbar-divider" aria-hidden="true"></span>
+                    <span class="local-indicator"><span class="status-dot"></span>Local instance</span>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <section class="notification-region" aria-label="Notifications">
+                            {% for category, message in messages %}
+                                <div class="notification notification--{{ 'error' if category == 'error' else 'success' if category == 'success' else 'info' }}" data-notification data-dismiss-ms="8000" role="{{ 'alert' if category == 'error' else 'status' }}" aria-live="{{ 'assertive' if category == 'error' else 'polite' }}" aria-atomic="true">
+                                    <p class="notification-message">{{ message }}</p>
+                                    <button class="notification-close" type="button" data-notification-close aria-label="Dismiss notification">&times;</button>
+                                </div>
+                            {% endfor %}
+                        </section>
+                    {% endif %}
+                {% endwith %}
+                <section class="welcome-panel" aria-labelledby="welcome-title">
+                    <div class="welcome-copy">
+                        <span class="eyebrow"><span class="eyebrow-line"></span> FILE INTEGRITY MONITORING</span>
+                        <h2 id="welcome-title">Good to have you here.</h2>
+                        <p>Register files, keep their fingerprints on record, and check their integrity whenever you need to.</p>
+                    </div>
+                    <div class="welcome-art" aria-hidden="true">
+                        <div class="orbit orbit-outer"></div>
+                        <div class="orbit orbit-inner"></div>
+                        <div class="art-glow"></div>
+                        <svg class="welcome-shield"><use href="#icon-cloud-lock"></use></svg>
+                        <span class="art-node node-one"></span><span class="art-node node-two"></span><span class="art-node node-three"></span>
+                    </div>
+                </section>
+
+                <section class="stats-grid" aria-label="File integrity statistics">
+                    <article class="stat-card">
+                        <div class="stat-topline"><span class="stat-icon icon-files"><svg class="icon"><use href="#icon-files"></use></svg></span><span class="stat-context">LIBRARY</span></div>
+                        <div class="stat-value">{{ total_files }}</div>
+                        <h3>Total Files</h3>
+                        <p>Files registered in CFIV</p>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-topline"><span class="stat-icon icon-verified"><svg class="icon"><use href="#icon-check"></use></svg></span><span class="stat-context">INTEGRITY</span></div>
+                        <div class="stat-value">{{ verified_files }}</div>
+                        <h3>Verified Files</h3>
+                        <p>Files passing all checks</p>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-topline"><span class="stat-icon icon-warning"><svg class="icon"><use href="#icon-alert"></use></svg></span><span class="stat-context">ATTENTION</span></div>
+                        <div class="stat-value">{{ failed_files }}</div>
+                        <h3>Tampered Files</h3>
+                        <p>Files that need review</p>
+                    </article>
+                    <article class="stat-card">
+                        <div class="stat-topline"><span class="stat-icon icon-key"><svg class="icon"><use href="#icon-key"></use></svg></span><span class="stat-context">CRYPTOGRAPHY</span></div>
+                        <div class="stat-value">{{ total_public_keys }}</div>
+                        <h3>Registered Keys</h3>
+                        <p>Public keys in your registry</p>
+                    </article>
+                </section>
+
+                <div class="dashboard-lower-grid">
+                    <section class="panel recent-panel" aria-labelledby="recent-title">
+                        <div class="panel-header">
+                            <div>
+                                <span class="eyebrow panel-eyebrow">YOUR LIBRARY</span>
+                                <h2 id="recent-title">Recent files</h2>
+                            </div>
+                            <span class="panel-count" aria-label="{{ total_files }} registered files">{{ total_files }} <span>FILES</span></span>
+                        </div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Filename</th>
+                                        <th scope="col">Date registered</th>
+                                        <th scope="col">File size</th>
+                                        <th scope="col">Integrity status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if recent_files %}
+                                    {% for file in recent_files %}
+                                    <tr class="recent-row">
+                                        <td class="recent-filename">{{ file.original_name }}</td>
+                                        <td>{{ file.created_at|replace('T', ' ')|replace('Z', ' UTC') }}</td>
+                                        <td>{{ file.size_bytes }} B</td>
+                                        <td><span class="status-badge status-{{ file.status|lower }}">{{ file.status }}</span></td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% else %}
+                                    <tr class="empty-row">
+                                        <td colspan="4">
+                                            <div class="empty-state">
+                                                <span class="empty-icon"><svg class="icon"><use href="#icon-empty"></use></svg></span>
+                                                <h3>No files to show yet</h3>
+                                                <p>Registered files will appear here when they are added to your library.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-footnote"><svg class="icon"><use href="#icon-clock"></use></svg><span>Showing the most recently registered files.</span></div>
+                    </section>
+
+                    <section class="panel actions-panel" aria-labelledby="actions-title">
+                        <div class="panel-header actions-heading">
+                            <div>
+                                <span class="eyebrow panel-eyebrow">GET STARTED</span>
+                                <h2 id="actions-title">Quick actions</h2>
+                            </div>
+                        </div>
+                        <p class="actions-intro">Choose a workflow to manage and protect your files.</p>
+                        <a class="action-card" href="{{ url_for('register_file') }}" aria-describedby="actions-note">
+                            <span class="action-icon action-register"><svg class="icon"><use href="#icon-upload"></use></svg></span>
+                            <span class="action-copy"><strong>Register a file</strong><small>Create a trusted integrity record</small></span>
+                            <svg class="icon action-arrow"><use href="#icon-arrow-up-right"></use></svg>
+                        </a>
+                        <a class="action-card" href="{{ url_for('verify_page') }}" aria-describedby="actions-note">
+                            <span class="action-icon action-verify"><svg class="icon"><use href="#icon-search-check"></use></svg></span>
+                            <span class="action-copy"><strong>Verify integrity</strong><small>Check a file against its record</small></span>
+                            <svg class="icon action-arrow"><use href="#icon-arrow-up-right"></use></svg>
+                        </a>
+                        <p class="actions-note" id="actions-note">Workflows will be available when connected.</p>
+                    </section>
+                </div>
+
+                <footer class="dashboard-footer">
+                    <span>Cloud File Integrity Verification System (CFIV)</span>
+                    <span class="footer-build"><span class="footer-dot"></span> LOCAL WORKSPACE</span>
+                </footer>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/notifications.js') }}" defer></script>
+</body>
+</html>
