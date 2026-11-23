@@ -7,11 +7,16 @@ import hashlib
 import hmac
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from uuid import uuid4
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from backend.cloud_storage import download_original_file, download_signature_artifact
+from backend.cloud_storage import (
+    download_original_file,
+    download_signature_artifact,
+    normalize_original_extension,
+)
 from backend.database import get_db_connection
 from backend.hashing import calculate_file_hashes
 from backend.signatures import (
@@ -105,8 +110,8 @@ def verify_file_integrity(
     )
 
 
-def verify_registered_file(file_id):
-    """Verify a stored upload using its database hashes, signature, and key."""
+def _load_registered_verification_context(file_id):
+    """Load and validate the registered record, key, and signature scheme."""
     connection = get_db_connection()
     try:
         file_record = connection.execute(
@@ -163,7 +168,14 @@ def verify_registered_file(file_id):
     }:
         raise ValueError("The registered file uses an unsupported signature scheme.")
 
-    artifact_signature_matches = True
+    return file_data, public_key
+
+
+def _registered_record_result(
+    file_path, file_data, public_key, *, artifact_signature_matches=True
+):
+    """Build verification checks using the record's original signature scheme."""
+    signature_scheme = file_data["signature_scheme"]
 
     def verifier(current_hashes):
         if not artifact_signature_matches:
@@ -178,10 +190,25 @@ def verify_registered_file(file_id):
             signed_digest, file_data["signature"], public_key
         )
 
-    original_hashes = {
-        "sha256": file_data["sha256"],
-        "sha3_256": file_data["sha3_256"],
-    }
+    return _build_verification_result(
+        file_path,
+        {"sha256": file_data["sha256"], "sha3_256": file_data["sha3_256"]},
+        verifier,
+    )
+
+
+def _record_registered_verification(file_id, file_data, result):
+    """Attach safe display metadata and persist the existing boolean history."""
+    result["file_id"] = file_data["file_id"]
+    result["original_name"] = file_data["original_name"]
+    result["attempt_id"] = record_verification_attempt(file_id, result)
+    return result
+
+
+def verify_registered_file(file_id):
+    """Verify a stored upload using its database hashes, signature, and key."""
+    file_data, public_key = _load_registered_verification_context(file_id)
+    signature_scheme = file_data["signature_scheme"]
     storage_backend = file_data["storage_backend"]
     if storage_backend == "local":
         upload_root = Path(Config.UPLOAD_FOLDER).resolve()
@@ -197,7 +224,7 @@ def verify_registered_file(file_id):
         if not stored_path.is_file():
             raise FileNotFoundError("The stored upload file is missing or is not a file.")
 
-        result = _build_verification_result(stored_path, original_hashes, verifier)
+        result = _registered_record_result(stored_path, file_data, public_key)
     elif storage_backend == "cloudinary":
         if not isinstance(file_data["signature"], bytes):
             raise ValueError("The registered signature data is malformed.")
@@ -218,13 +245,46 @@ def verify_registered_file(file_id):
             artifact_signature_matches = hmac.compare_digest(
                 artifact_signature, file_data["signature"]
             )
-            result = _build_verification_result(
-                stored_path, original_hashes, verifier
+            result = _registered_record_result(
+                stored_path,
+                file_data,
+                public_key,
+                artifact_signature_matches=artifact_signature_matches,
             )
     else:
         raise ValueError("The registered file uses an unsupported storage backend.")
 
-    result["file_id"] = file_data["file_id"]
-    result["original_name"] = file_data["original_name"]
-    result["attempt_id"] = record_verification_attempt(file_id, result)
-    return result
+    return _record_registered_verification(file_id, file_data, result)
+
+
+def verify_uploaded_copy(file_id, uploaded_file):
+    """Verify a submitted local copy against an existing registration."""
+    if not isinstance(file_id, str) or not file_id.strip():
+        raise ValueError("A registered file ID is required.")
+    original_name = getattr(uploaded_file, "filename", None)
+    extension = normalize_original_extension(original_name)
+    stream = getattr(uploaded_file, "stream", None)
+    if stream is None or not callable(getattr(stream, "read", None)):
+        raise ValueError("The uploaded file does not have a readable stream.")
+
+    file_data, public_key = _load_registered_verification_context(file_id)
+
+    # The generated staging name prevents user filenames or paths from being
+    # used on disk. TemporaryDirectory removes it on success and every failure.
+    with TemporaryDirectory(prefix="cfiv-reupload-verify-") as temporary_directory:
+        staged_path = Path(temporary_directory) / f"{uuid4().hex}{extension}"
+        size_bytes = 0
+        with staged_path.open("xb") as staged_file:
+            while True:
+                chunk = stream.read(64 * 1024)
+                if not chunk:
+                    break
+                if not isinstance(chunk, bytes):
+                    raise ValueError("Uploaded file stream must return bytes.")
+                size_bytes += len(chunk)
+                if size_bytes > Config.MAX_FILE_SIZE:
+                    raise ValueError("The uploaded file exceeds the 16 MB limit.")
+                staged_file.write(chunk)
+
+        result = _registered_record_result(staged_path, file_data, public_key)
+    return _record_registered_verification(file_id, file_data, result)

@@ -174,6 +174,52 @@
                     </form>
                 </section>
 
+                <section class="panel verify-panel" id="uploaded-copy-panel" aria-labelledby="uploaded-copy-title">
+                    <div class="panel-header">
+                        <div>
+                            <span class="eyebrow panel-eyebrow">LOCAL COPY CHECK</span>
+                            <h2 id="uploaded-copy-title">Verify an Uploaded Copy</h2>
+                        </div>
+                    </div>
+
+                    <form class="verify-form" method="post" action="{{ url_for('verify_uploaded_copy_route') }}" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ uploaded_copy_csrf_token }}">
+
+                        <p class="field-hint">Choose the registered record and a local copy. CFIV checks the uploaded copy against the original registered SHA-256 and SHA3-256 hashes and RSA signature. It does not replace or modify the registered original.</p>
+
+                        <div class="form-field">
+                            <label class="form-label" for="uploaded-copy-file-id">Original registered file</label>
+                            <select class="form-control" id="uploaded-copy-file-id" name="file_id" required {% if not registered_files %}disabled{% endif %} aria-describedby="uploaded-copy-action-note">
+                                {% if registered_files %}
+                                    <option value="" selected>Select a registered file</option>
+                                    {% for file in registered_files %}
+                                        <option value="{{ file.file_id }}">{{ file.original_name }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="" selected>No registered files available</option>
+                                {% endif %}
+                            </select>
+                            {% if not registered_files %}
+                                <p class="field-hint">Register a file before verifying an uploaded copy.</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-label" for="uploaded-copy-file">Local file to verify</label>
+                            <input class="form-control" id="uploaded-copy-file" name="uploaded_file" type="file" accept=".txt,.csv,.pdf,.docx,.xlsx,.pptx,.jpg,.jpeg,.png" required {% if not registered_files %}disabled{% endif %} aria-describedby="uploaded-copy-action-note">
+                        </div>
+
+                        <div class="verify-actions">
+                            <span class="field-hint">Only the selected copy is checked; the original registration remains unchanged.</span>
+                            <button class="register-submit" id="uploaded-copy-submit" type="submit" disabled aria-describedby="uploaded-copy-action-note">
+                                <svg class="icon" aria-hidden="true"><use href="#icon-search-check"></use></svg>
+                                Verify Uploaded Copy
+                            </button>
+                        </div>
+                        <p class="verify-action-note" id="uploaded-copy-action-note" aria-live="polite">Select a registered file and choose a local copy to enable verification.</p>
+                    </form>
+                </section>
+
                 <section class="panel results-panel" aria-labelledby="verification-results-title">
                     <div class="panel-header">
                         <div>

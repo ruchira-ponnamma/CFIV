@@ -68,4 +68,36 @@
             verificationTime.dataset.timestamp || verificationTime.dateTime
         );
     }
+
+    const uploadedCopySelector = document.querySelector("#uploaded-copy-file-id");
+    const uploadedCopyInput = document.querySelector("#uploaded-copy-file");
+    const uploadedCopyButton = document.querySelector("#uploaded-copy-submit");
+    const uploadedCopyNote = document.querySelector("#uploaded-copy-action-note");
+
+    if (uploadedCopySelector && uploadedCopyInput && uploadedCopyButton) {
+        function updateUploadedCopyForm() {
+            const hasRegisteredFile = Boolean(uploadedCopySelector.value);
+            const hasLocalFile = Boolean(
+                uploadedCopyInput.files && uploadedCopyInput.files.length > 0
+            );
+            uploadedCopyButton.disabled = !hasRegisteredFile || !hasLocalFile;
+
+            if (uploadedCopyNote) {
+                if (!hasRegisteredFile) {
+                    uploadedCopyNote.textContent =
+                        "Select a registered file and choose a local copy to enable verification.";
+                } else if (!hasLocalFile) {
+                    uploadedCopyNote.textContent =
+                        "Choose a local copy to verify against the selected registration.";
+                } else {
+                    uploadedCopyNote.textContent =
+                        "Ready to verify the selected local copy. The registered original will not be changed.";
+                }
+            }
+        }
+
+        uploadedCopySelector.addEventListener("change", updateUploadedCopyForm);
+        uploadedCopyInput.addEventListener("change", updateUploadedCopyForm);
+        updateUploadedCopyForm();
+    }
 })();

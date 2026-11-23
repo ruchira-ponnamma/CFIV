@@ -16,7 +16,7 @@ from flask import (
 )
 from werkzeug.exceptions import RequestEntityTooLarge
 
-from backend.cloud_storage import CloudStorageError
+from backend.cloud_storage import CloudStorageError, normalize_original_extension
 from backend.database import init_db
 from backend.dashboard_service import get_dashboard_data, get_registered_files_with_status
 from backend.file_service import list_registered_files, register_uploaded_file
@@ -25,7 +25,7 @@ from backend.key_registry import (
     list_registered_public_keys,
 )
 from backend.registration_diagnostics import new_registration_correlation_id
-from backend.verification import verify_registered_file
+from backend.verification import verify_registered_file, verify_uploaded_copy
 from backend.verification_history import get_verification_attempt
 from config import Config, validate_config
 
@@ -171,6 +171,8 @@ def verify_page():
 
         csrf_token = secrets.token_urlsafe(32)
         session["_verify_csrf_token"] = csrf_token
+        uploaded_copy_csrf_token = secrets.token_urlsafe(32)
+        session["_uploaded_copy_verify_csrf_token"] = uploaded_copy_csrf_token
         attempt_id = request.args.get("attempt_id")
         verification_attempt = None
         if attempt_id is not None:
@@ -193,6 +195,7 @@ def verify_page():
             "verify.html",
             registered_files=registered_files,
             csrf_token=csrf_token,
+            uploaded_copy_csrf_token=uploaded_copy_csrf_token,
             verification_attempt=verification_attempt,
             error_message=None,
         )
@@ -256,6 +259,91 @@ def verify_page():
             error_message="CFIV could not complete verification. Please try again.",
             status=500,
             registered_files=registered_files,
+        )
+
+    return redirect(url_for("verify_page", attempt_id=result["attempt_id"]))
+
+
+@app.route("/verify-uploaded-copy", methods=["POST"])
+def verify_uploaded_copy_route():
+    """Verify a locally submitted copy against an existing registration."""
+    expected_token = session.pop("_uploaded_copy_verify_csrf_token", None)
+    submitted_token = request.form.get("csrf_token", "")
+    if (
+        not isinstance(expected_token, str)
+        or not isinstance(submitted_token, str)
+        or not hmac.compare_digest(expected_token, submitted_token)
+    ):
+        session["_uploaded_copy_verify_csrf_token"] = secrets.token_urlsafe(32)
+        return Response(
+            "Your uploaded-copy verification form expired. Please reload and try again.",
+            status=400,
+            mimetype="text/plain",
+        )
+
+    file_id = request.form.get("file_id", "")
+    uploaded_file = request.files.get("uploaded_file")
+    filename = getattr(uploaded_file, "filename", None)
+    stream = getattr(uploaded_file, "stream", None)
+    if not isinstance(file_id, str) or not file_id.strip():
+        session["_uploaded_copy_verify_csrf_token"] = secrets.token_urlsafe(32)
+        return Response(
+            "Select a registered file and a local copy to verify.",
+            status=400,
+            mimetype="text/plain",
+        )
+    if (
+        not isinstance(filename, str)
+        or not filename.strip()
+        or stream is None
+        or not callable(getattr(stream, "read", None))
+    ):
+        session["_uploaded_copy_verify_csrf_token"] = secrets.token_urlsafe(32)
+        return Response(
+            "Choose a readable local file to verify.",
+            status=400,
+            mimetype="text/plain",
+        )
+
+    try:
+        normalize_original_extension(filename)
+    except ValueError:
+        session["_uploaded_copy_verify_csrf_token"] = secrets.token_urlsafe(32)
+        return Response(
+            "The selected file type is not supported for verification.",
+            status=400,
+            mimetype="text/plain",
+        )
+
+    try:
+        result = verify_uploaded_copy(file_id, uploaded_file)
+    except LookupError:
+        session["_uploaded_copy_verify_csrf_token"] = secrets.token_urlsafe(32)
+        return Response(
+            "The selected registered file or its key was not found.",
+            status=404,
+            mimetype="text/plain",
+        )
+    except FileNotFoundError:
+        session["_uploaded_copy_verify_csrf_token"] = secrets.token_urlsafe(32)
+        return Response(
+            "The submitted file is unavailable for verification.",
+            status=400,
+            mimetype="text/plain",
+        )
+    except ValueError as error:
+        session["_uploaded_copy_verify_csrf_token"] = secrets.token_urlsafe(32)
+        if str(error) == "The uploaded file exceeds the 16 MB limit.":
+            message = "The selected file exceeds the 16 MiB file-size limit."
+        else:
+            message = "The file record or submitted file is invalid."
+        return Response(message, status=400, mimetype="text/plain")
+    except (OSError, sqlite3.Error, UnsupportedAlgorithm, RuntimeError):
+        session["_uploaded_copy_verify_csrf_token"] = secrets.token_urlsafe(32)
+        return Response(
+            "CFIV could not complete uploaded-copy verification. Please try again.",
+            status=500,
+            mimetype="text/plain",
         )
 
     return redirect(url_for("verify_page", attempt_id=result["attempt_id"]))
